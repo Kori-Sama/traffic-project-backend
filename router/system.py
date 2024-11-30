@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from core.middleware import LogRoute
-from models.system import SystemInfo
+from schemas.system import SystemInfo
 from services.system import SystemService
-from models.common import Response
+from schemas.common import Response
 
 router = APIRouter(prefix="/system", route_class=LogRoute)
 

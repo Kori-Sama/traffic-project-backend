@@ -21,7 +21,7 @@ async def init_orm():
         },
         "apps": {
             "models": {
-                "models": ["schemas"],
+                "models": ["models"],
                 "default_connection": "default"
             }
         }})

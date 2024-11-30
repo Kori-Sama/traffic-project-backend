@@ -2,7 +2,6 @@ from core.dao import DAO
 
 
 class Service:
-    filter_del = {"status__not": 9}
 
     def __init__(self, dao: DAO):
         self.dao = dao
@@ -15,7 +14,7 @@ class Service:
         :return:
         """
         skip = (offset - 1) * limit
-        return dict(data=await self.dao.selects(skip, limit, Service.filter_del))
+        return dict(data=await self.dao.selects(skip, limit))
 
     async def query_items(self, query):
         """
@@ -39,7 +38,7 @@ class Service:
         filters = {"id": pk}
         filters.update(Service.filter_del)
         if await self.dao.update(filters, {"status": 9}) == 0:
-            return dict(code=400, msg="数据不存在")
+            return dict(code=400, msg="data not exist")
         return dict()
 
     async def update_item(self, pk, data):
@@ -50,7 +49,7 @@ class Service:
         :return:
         """
         if await self.dao.update({"id": pk}, data.dict()) == 0:
-            return dict(code=400, msg="数据不存在")
+            return dict(code=400, msg="data not exist")
         return dict()
 
     async def create_item(self, data):

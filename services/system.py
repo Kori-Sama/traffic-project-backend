@@ -1,6 +1,6 @@
 import psutil
-from models.common import Response
-from models.system import Performance, SystemInfo, Usage
+from schemas.common import Response
+from schemas.system import Performance, SystemInfo, Usage
 
 
 class SystemService:

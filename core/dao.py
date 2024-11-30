@@ -1,8 +1,9 @@
 from tortoise import connections
+from tortoise import models
 
 
 class DAO:
-    def __init__(self, model):
+    def __init__(self, model: models.Model):
         """
         初始化
         :param model: 模型类 orm model
@@ -55,7 +56,7 @@ class DAO:
         return await self.model.create(**data)
 
     async def selects(
-        self, offset: int, limit: int, kwargs: dict = None, order_by: str = "-created"
+        self, offset: int, limit: int, kwargs: dict = None, order_by: str = None
     ) -> dict:
         """
         条件分页查询数据列表, 支持排序

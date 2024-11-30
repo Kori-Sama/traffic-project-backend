@@ -4,7 +4,7 @@
 ./scripts/install.sh
 ```
 ## 配置文件
-在项目目录下新建一个.env文件
+在项目目录下新建一个.env文件 </br>
 对照.env.example的示例填写对应的环境变量
 
 ## 项目运行

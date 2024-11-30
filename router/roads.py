@@ -2,8 +2,8 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from core.middleware import LogRoute
-from models.common import ListData, QueryData, Response
-from models.roads import RoadInfo
+from schemas.common import ListData, QueryData, Response
+from schemas.roads import RoadInfo
 from services.roads import RoadsService
 
 

@@ -1,8 +1,8 @@
 from core.dao import DAO
-from schemas.roads import RoadsSchema
+from models.roads import RoadModel
 from services.common import Service
 
-dao = DAO(RoadsSchema)
+dao = DAO(RoadModel)
 
 
 class RoadsService(Service):

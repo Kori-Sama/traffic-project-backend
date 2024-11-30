@@ -1,5 +1,9 @@
-from pydantic import BaseModel, Field
+from tortoise import fields, models
 
 
-class RoadInfo(BaseModel):
-    id: int = Field(description="ID of road")
+class RoadModel(models.Model):
+    id = fields.IntField(pk=True)
+
+    class Meta:
+        table = "roads"
+        table_description = "Roads information"
