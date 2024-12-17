@@ -4,6 +4,13 @@ from db.models import RoadCondition
 
 
 @with_connection
+async def list_road_conditions(conn, offset: int, limit: int) -> list[RoadCondition]:
+    query = "SELECT * FROM road_condition LIMIT $1 OFFSET $2;"
+    records = await conn.fetch(query, limit, offset)
+    return [RoadCondition(**record) for record in records]
+
+
+@with_connection
 async def insert_road_condition(
         conn,
         date: date,

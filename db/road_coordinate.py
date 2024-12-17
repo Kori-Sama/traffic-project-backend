@@ -1,4 +1,6 @@
 from typing import Optional
+
+from shapely import LineString
 from db.core import with_connection
 from db.models import RoadCoordinate
 
@@ -7,7 +9,7 @@ from db.models import RoadCoordinate
 async def list_road_coordinates(conn, offset: int, limit: int) -> list[RoadCoordinate]:
     query = "SELECT * FROM road_coordinate LIMIT $1 OFFSET $2;"
     records = await conn.fetch(query, limit, offset)
-    return [RoadCoordinate(**record) for record in records]
+    return [RoadCoordinate.from_db(record) for record in records]
 
 
 @with_connection
@@ -15,7 +17,7 @@ async def get_road_coordinate(conn, link_id: int) -> Optional[RoadCoordinate]:
     query = "SELECT * FROM road_coordinate WHERE link_id = $1;"
     record = await conn.fetchrow(query, link_id)
     if record:
-        return RoadCoordinate(**record)
+        return RoadCoordinate.from_db(record)
     return None
 
 

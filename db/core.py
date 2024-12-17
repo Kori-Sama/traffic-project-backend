@@ -28,7 +28,8 @@ async def get_db():
 
 
 def with_connection(func: Callable):
-    async def wrapper(*args, **kwargs) -> Any:
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
         db = await get_db()
         async with db.acquire() as connection:
             return await func(connection, *args, **kwargs)

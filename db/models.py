@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from typing import Optional
 from shapely.geometry import LineString
+from shapely import wkb
+from schemas import traffic as schemas
 
 
 @dataclass
@@ -10,6 +12,23 @@ class RoadCoordinate:
     link_length: int
     road_geom: LineString
     road_name: str
+
+    def to_schema(self):
+        return schemas.RoadCoordinateModel(
+            link_id=self.link_id,
+            link_length=self.link_length,
+            road_geom=self.road_geom.coords.xy,
+            road_name=self.road_name,
+        )
+
+    @staticmethod
+    def from_db(record) -> "RoadCoordinate":
+        return RoadCoordinate(
+            link_id=record["link_id"],
+            link_length=record["link_length"],
+            road_geom=wkb.loads(record["road_geom"], hex=True),
+            road_name=record["road_name"],
+        )
 
 
 @dataclass
