@@ -2,12 +2,12 @@ from fastapi import FastAPI
 
 from core import env
 from core.middleware import middlewares
-from core.db import close_orm, init_orm
+from db.core import close_db, init_db
 from core.utils import load_routers
 
 app = FastAPI(
-    on_startup=[init_orm],
-    on_shutdown=[close_orm],
+    on_startup=[init_db],
+    on_shutdown=[close_db],
     middleware=middlewares
 )
 

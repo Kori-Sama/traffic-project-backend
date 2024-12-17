@@ -12,14 +12,12 @@ from starlette.responses import Response
 from core.log import logger
 
 
-# fix： 中间件没法获取到request 请求体数据 响应体
 class CustomRequestLogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         logger.info(
             f"Client: {request.client} Method: {request.method}  "
             f"Path: {request.url} Headers: {request.headers}"
         )
-        # python-multipart  == await request.form()
         response = await call_next(request)
         return response
 
