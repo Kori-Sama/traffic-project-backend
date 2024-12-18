@@ -16,8 +16,7 @@ jobs:
         with:
           command: |
             cd app
-            git pull
-            python ./main.py
+            ./run.sh
           host: ${{ secrets.HOST }}
           username: kori
           port: 22
