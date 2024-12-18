@@ -15,9 +15,9 @@ class RoadCoordinate:
 
     def to_schema(self):
         return schemas.RoadCoordinateModel(
-            link_id=self.link_id,
+            link_id=str(self.link_id),
             link_length=self.link_length,
-            road_geom=self.road_geom.coords.xy,
+            road_geom=self.road_geom.coords,
             road_name=self.road_name,
         )
 
@@ -57,6 +57,17 @@ class RoadCondition:
     real_speed: float
     free_speed: float
     idx: float
+
+    def to_schema(self):
+        return schemas.RoadConditionModel(
+            condition_id=self.condition_id,
+            date=self.date,
+            link_id=str(self.link_id),
+            daily_10min=self.daily_10min,
+            real_speed=self.real_speed,
+            free_speed=self.free_speed,
+            idx=self.idx,
+        )
 
 
 @dataclass

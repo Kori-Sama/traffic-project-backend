@@ -4,9 +4,9 @@ from typing import List, Optional, Tuple
 
 
 class RoadCoordinateModel(BaseModel):
-    link_id: int
+    link_id: str
     link_length: int
-    road_geom: Tuple[List[float], List[float]]
+    road_geom: List[Tuple[float, float]]
     road_name: str
 
 
@@ -22,7 +22,7 @@ class TrafficEventModel(BaseModel):
 class RoadConditionModel(BaseModel):
     condition_id: int
     date: date
-    link_id: int
+    link_id: str
     daily_10min: datetime
     real_speed: float
     free_speed: float
@@ -31,7 +31,7 @@ class RoadConditionModel(BaseModel):
 
 class TrafficStatusModel(BaseModel):
     status_id: int
-    link_id: int
+    link_id: str
     daily_10min: datetime
     status: str
     create_time: datetime = Field(default_factory=datetime.now)
@@ -39,7 +39,7 @@ class TrafficStatusModel(BaseModel):
 
 class SpeedLimitPolicyModel(BaseModel):
     policy_id: int
-    link_id: int
+    link_id: str
     speed_limit: float
     start_time: datetime
     end_time: Optional[datetime]

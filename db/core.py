@@ -2,6 +2,7 @@ import asyncpg
 from core.env import config
 from functools import wraps
 from typing import Callable, Any
+from core.log import logger
 
 db = None
 
@@ -15,12 +16,12 @@ async def init_db():
         host=config.DB.HOST,
         port=config.DB.PORT
     )
-    print("Database initialized.")
+    logger.info("Database connection established.")
 
 
 async def close_db():
     await db.close()
-    print("Database connection closed.")
+    logger.info("Database connection closed.")
 
 
 async def get_db():
