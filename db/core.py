@@ -1,7 +1,7 @@
 import asyncpg
 from core.env import config
 from functools import wraps
-from typing import Callable, Any
+from typing import Awaitable, Callable, Concatenate, Coroutine, ParamSpec, TypeVar, Any
 from core.log import logger
 
 db = None
@@ -28,9 +28,14 @@ async def get_db():
     return db
 
 
-def with_connection(func: Callable):
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def with_connection(func: Callable[Concatenate[Any, P], R]) -> Callable[P, R]:
+
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         db = await get_db()
         async with db.acquire() as connection:
             return await func(connection, *args, **kwargs)
