@@ -33,7 +33,6 @@ R = TypeVar("R")
 
 
 def with_connection(func: Callable[Concatenate[Any, P], R]) -> Callable[P, R]:
-
     @wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         db = await get_db()

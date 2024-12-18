@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
@@ -16,3 +17,8 @@ class QueryData(BaseModel):
 
     offset: int = Field(default=1, description="页码", ge=1)
     limit: int = Field(default=10, description="数量", ge=1)
+
+
+class TimeRange(BaseModel):
+    start_time: datetime
+    end_time: datetime

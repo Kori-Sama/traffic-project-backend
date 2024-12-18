@@ -3,6 +3,7 @@ from typing import Optional
 from shapely import LineString
 from db.core import with_connection
 from db.models import RoadCoordinate
+from db.road_condition import get_conditions_by_link_id
 
 
 @with_connection

@@ -8,7 +8,7 @@ from schemas import traffic as schemas
 
 @dataclass
 class RoadCoordinate:
-    link_id: int
+    link_id: int  # 由于该int过大, 在前端会丢失精度, 所以传给前端的时候需要转换成str
     link_length: int
     road_geom: LineString
     road_name: str
