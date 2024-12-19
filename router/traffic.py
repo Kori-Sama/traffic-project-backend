@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from core.middleware import LogRoute
-from db.road_condition import get_conditions_by_link_id, get_conditions_with_time_range, list_road_conditions
+from db.road_condition import get_conditions_by_link_id, get_conditions_with_time_range, get_total_length, list_road_conditions
 from db.road_coordinate import get_road_coordinate, list_road_coordinates
 from router.error import LINK_ID_NOT_FOUND
 from router.response import Bad, Ok
@@ -85,4 +85,13 @@ async def get_conditions_with_time_range_api(link_id: str, time_range: TimeRange
     if not data:
         return Bad(LINK_ID_NOT_FOUND)
 
+    return Ok(data)
+
+
+@router.get("/total-length")
+async def get_total_length_api():
+    """
+    Get the total length of all road coordinates.
+    """
+    data = await get_total_length()
     return Ok(data)

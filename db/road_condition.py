@@ -49,3 +49,10 @@ async def insert_road_condition(
         idx
     )
     return condition_id
+
+
+@with_connection
+async def get_total_length(conn) -> int:
+    query = "SELECT SUM(link_length) FROM road_coordinate;"
+    total_length = await conn.fetchval(query)
+    return total_length
