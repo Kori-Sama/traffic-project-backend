@@ -1,7 +1,7 @@
 import asyncpg
 from core.env import config
 from functools import wraps
-from typing import Awaitable, Callable, Concatenate, Coroutine, ParamSpec, TypeVar, Any
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
 from core.log import logger
 
 db = None

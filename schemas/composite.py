@@ -9,4 +9,5 @@ class RoadModel(BaseModel):
     link_length: int
     road_geom: List[Tuple[float, float]]
     road_name: str
+    direction: int
     road_conditions: Optional[List[RoadConditionModel]] = None

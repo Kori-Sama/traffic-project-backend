@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS road_coordinate (
     link_length int NOT NULL,    -- 路段长度
     road_geom GEOMETRY(LINESTRING, 4326) NOT NULL, -- 路段几何信息，使用 LINESTRING 类型
     road_name VARCHAR(255) NOT NULL      -- 路段名称
+    direction INT NOT NULL,               -- 路段方向
 );
 
 

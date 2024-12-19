@@ -12,6 +12,7 @@ class RoadCoordinate:
     link_length: int
     road_geom: LineString
     road_name: str
+    direction: int
 
     def to_schema(self):
         return schemas.RoadCoordinateModel(
@@ -19,6 +20,7 @@ class RoadCoordinate:
             link_length=self.link_length,
             road_geom=self.road_geom.coords,
             road_name=self.road_name,
+            direction=self.direction
         )
 
     @staticmethod
@@ -28,6 +30,7 @@ class RoadCoordinate:
             link_length=record["link_length"],
             road_geom=wkb.loads(record["road_geom"], hex=True),
             road_name=record["road_name"],
+            direction=record["direction"]
         )
 
 

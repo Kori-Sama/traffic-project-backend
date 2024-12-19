@@ -8,6 +8,7 @@ class RoadCoordinateModel(BaseModel):
     link_length: int
     road_geom: List[Tuple[float, float]]
     road_name: str
+    direction: int
 
 
 class TrafficEventModel(BaseModel):
