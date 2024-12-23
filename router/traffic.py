@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from core.middleware import LogRoute
-from db.road_condition import get_conditions_by_link_id, get_conditions_with_time_range, get_total_length, list_road_conditions
+from db.road_condition import get_conditions_by_link_id, get_conditions_with_time_range, get_last_conditions, get_total_length, list_road_conditions
 from db.road_coordinate import get_road_coordinate, list_road_coordinates
 from router.error import LINK_ID_NOT_FOUND
 from router.response import Bad, Ok
@@ -48,24 +48,13 @@ async def get_road_coordinate_api(link_id: str, with_conditions: bool = False, q
     return Ok(RoadModel(**road_coordinate.model_dump(), road_conditions=road_conditions))
 
 
-@router.get("/conditions")
-async def list_road_conditions_api(query: QueryData = Depends()) -> Response[List[RoadConditionModel]]:
-    """
-    List road conditions with pagination, if no query parameters are provided, it will return the first 10 records.
-    """
-    data = await list_road_conditions(query.offset, query.limit)
-    data = [item.to_schema() for item in data]
-    return Ok(data)
-
-
 @router.get("/conditions/{link_id}")
-async def get_conditions_by_link_id_api(link_id: str, query: QueryData = Depends()) -> Response[List[RoadConditionModel]]:
+async def get_last_conditions_api(link_id: str, last_num: int) -> Response[List[RoadConditionModel]]:
     """
-    Get road conditions by link_id with pagination, if no query parameters are provided, it will return the first 10 records.
+    Get the last n road conditions by link_id.
     """
     id = int(link_id)
-    data = await get_conditions_by_link_id(id)
-
+    data = await get_last_conditions(id, last_num)
     data = [item.to_schema() for item in data]
     if not data:
         return Bad(LINK_ID_NOT_FOUND)
