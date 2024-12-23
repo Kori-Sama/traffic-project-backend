@@ -35,8 +35,8 @@ class LogRoute(APIRoute):
             response: Response = await original_route_handler(request)
             duration = time.time() - before
             response.headers["X-Response-Time"] = str(duration)
-            logger.info(f"{request_id} Response Log {duration}s {response.headers}\n"
-                        f" {response.body.decode('utf-8')}")
+            logger.info(f"{request_id} Response Log {
+                        duration}s {response.headers}\n")
             return response
 
         return custom_route_handler

@@ -71,7 +71,7 @@ async def predict_api(
     link_id: str,
 ) -> Response[PredictResponse]:
     """
-    Predict traffic volume by LSTM model.
+    Predict traffic speed and volume by LSTM model.
     """
     conditions = await get_last_conditions(int(link_id), 6)
 

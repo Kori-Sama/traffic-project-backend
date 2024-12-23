@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from core import env
 from core.middleware import middlewares
@@ -10,6 +11,8 @@ app = FastAPI(
     on_shutdown=[close_db],
     middleware=middlewares
 )
+
+app.mount("/videos", StaticFiles(directory="videos"), name="video")
 
 
 load_routers(app, "router")
