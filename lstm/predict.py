@@ -103,8 +103,8 @@ def run(
         # 未来的时间序列
         start=df['time'].iloc[-1] + pd.Timedelta(minutes=5), periods=6, freq='5T')
     predictions_df = pd.DataFrame({
-        'Time': future_times,
-        'Predicted_Traffic_Volume': predicted_traffic_rounded.flatten()  # 使用取整后的流量
+        'time': future_times,
+        'predicted_traffic_volume': predicted_traffic_rounded.flatten()  # 使用取整后的流量
     })
 
     return predictions_df.to_dict(orient='records')

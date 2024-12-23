@@ -3,12 +3,16 @@ from datetime import datetime
 
 
 class PredictInput(BaseModel):
-    road_id: int
-    start_time: str
-    end_time: str
-    traffic_volume: int
+    link_id: str
+    start_time: datetime
+    end_time: datetime
 
 
 class PredictOutput(BaseModel):
     time: datetime
-    predicted_traffic_volume: int
+    volume: float
+
+
+class PredictResponse(BaseModel):
+    last: list[PredictOutput] = Field(..., description="最近的真实数据")
+    predict: list[PredictOutput] = Field(..., description="预测数据")
