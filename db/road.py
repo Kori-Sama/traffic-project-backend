@@ -21,23 +21,23 @@ async def get_road(conn, link_id: int) -> Optional[Road]:
 
 
 @with_connection
-async def insert_road(conn, road_coordinate: Road):
+async def insert_road(conn, road: Road):
     query = """
     INSERT INTO road (link_id, link_length, road_geom, road_name, direction)
     VALUES ($1, $2, $3, $4, $5);
     """
     await conn.execute(
         query,
-        road_coordinate.link_id,
-        road_coordinate.link_length,
-        str(road_coordinate.road_geom),
-        road_coordinate.road_name,
-        road_coordinate.direction,
+        road.link_id,
+        road.link_length,
+        str(road.road_geom),
+        road.road_name,
+        road.direction,
     )
 
 
 @with_connection
-async def update_road(conn, road_coordinate: Road):
+async def update_road(conn, road: Road):
     query = """
     UPDATE road
     SET link_length = $2, road_geom = $3, road_name = $4, direction = $5
@@ -45,11 +45,11 @@ async def update_road(conn, road_coordinate: Road):
     """
     await conn.execute(
         query,
-        road_coordinate.link_id,
-        road_coordinate.link_length,
-        str(road_coordinate.road_geom),
-        road_coordinate.road_name,
-        road_coordinate.direction,
+        road.link_id,
+        road.link_length,
+        str(road.road_geom),
+        road.road_name,
+        road.direction,
     )
 
 
