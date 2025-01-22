@@ -3,7 +3,7 @@ from datetime import datetime, date
 from typing import List, Optional, Tuple
 
 
-class RoadCoordinateModel(BaseModel):
+class RoadModel(BaseModel):
     link_id: str
     link_length: int
     road_geom: List[Tuple[float, float]]

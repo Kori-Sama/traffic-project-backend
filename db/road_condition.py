@@ -52,13 +52,6 @@ async def insert_road_condition(
 
 
 @with_connection
-async def get_total_length(conn) -> int:
-    query = "SELECT SUM(link_length) FROM road_coordinate;"
-    total_length = await conn.fetchval(query)
-    return total_length
-
-
-@with_connection
 async def get_last_conditions(conn, link_id: int, last_num: int) -> list[RoadCondition]:
     query = """
     SELECT *

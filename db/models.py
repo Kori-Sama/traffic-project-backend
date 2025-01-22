@@ -7,7 +7,7 @@ from schemas import traffic as schemas
 
 
 @dataclass
-class RoadCoordinate:
+class Road:
     link_id: int  # 由于该int过大, 在前端会丢失精度, 所以传给前端的时候需要转换成str
     link_length: int
     road_geom: LineString
@@ -15,7 +15,7 @@ class RoadCoordinate:
     direction: int
 
     def to_schema(self):
-        return schemas.RoadCoordinateModel(
+        return schemas.RoadModel(
             link_id=str(self.link_id),
             link_length=self.link_length,
             road_geom=self.road_geom.coords,
@@ -24,8 +24,8 @@ class RoadCoordinate:
         )
 
     @staticmethod
-    def from_db(record) -> "RoadCoordinate":
-        return RoadCoordinate(
+    def from_db(record) -> "Road":
+        return Road(
             link_id=record["link_id"],
             link_length=record["link_length"],
             road_geom=wkb.loads(record["road_geom"], hex=True),

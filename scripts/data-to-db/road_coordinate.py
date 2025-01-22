@@ -19,9 +19,9 @@ def to_line_string(xy: str):
 
 async def main():
     import csv
-    from db.road_coordinate import insert_road_coordinate
+    from db.road import insert_road
     # from db.road_coordinate import update_road_coordinate
-    from db.models import RoadCoordinate
+    from db.models import Road
     from db.core import close_db, init_db
 
     await init_db()
@@ -38,7 +38,7 @@ async def main():
                 road_name = row[1]
                 direction = int(row[-1])
 
-                road_coordinate = RoadCoordinate(
+                road_coordinate = Road(
                     link_id=link_id,
                     link_length=link_length,
                     road_geom=road_geom,
@@ -46,7 +46,7 @@ async def main():
                     direction=direction
                 )
 
-                await insert_road_coordinate(road_coordinate)
+                await insert_road(road_coordinate)
                 insert_count += 1
                 print(f"插入成功: link_id={link_id}, road_name={road_name}")
             except Exception as e:

@@ -1,7 +1,7 @@
 -- 确保 PostGIS 扩展已启用
 CREATE EXTENSION IF NOT EXISTS postgis;
 
-CREATE TABLE IF NOT EXISTS road_coordinate (
+CREATE TABLE IF NOT EXISTS road (
     link_id BIGINT PRIMARY KEY,               -- 路段ID，主键，自增
     link_length int NOT NULL,    -- 路段长度
     road_geom GEOMETRY(LINESTRING, 4326) NOT NULL, -- 路段几何信息，使用 LINESTRING 类型
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS road_to_event (
     id SERIAL PRIMARY KEY,                -- 主键，自增
     link_id BIGINT NOT NULL,             -- 路段ID
     event_id INTEGER NOT NULL,            -- 事件ID
-    FOREIGN KEY (link_id) REFERENCES road_coordinate(link_id), -- 外键约束
+    FOREIGN KEY (link_id) REFERENCES road(link_id), -- 外键约束
     FOREIGN KEY (event_id) REFERENCES traffic_event(event_id)  -- 外键约束
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS road_condition (
     real_speed DOUBLE PRECISION NOT NULL, -- 实际车速
     free_speed DOUBLE PRECISION NOT NULL, -- 自由流速
     idx DOUBLE PRECISION NOT NULL,        -- 流畅度（r/f）
-    FOREIGN KEY (link_id) REFERENCES road_coordinate(link_id), -- 外键约束
+    FOREIGN KEY (link_id) REFERENCES road(link_id), -- 外键约束
     UNIQUE (link_id, daily_10min) -- 联合唯一索引
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS traffic_status (
     daily_10min TIMESTAMP NOT NULL,         -- 时间段（以10分钟为单位）
     status VARCHAR(50) NOT NULL,          -- 交通状态（IDX判断）
     create_time TIMESTAMP DEFAULT NOW(),  -- 创建时间，默认为当前时间
-    FOREIGN KEY (link_id) REFERENCES road_coordinate(link_id) -- 外键约束
+    FOREIGN KEY (link_id) REFERENCES road(link_id) -- 外键约束
 );
 
 CREATE TABLE IF NOT EXISTS speed_limit_policy (
@@ -56,5 +56,5 @@ CREATE TABLE IF NOT EXISTS speed_limit_policy (
     start_time TIMESTAMP NOT NULL,        -- 限速开始时间
     end_time TIMESTAMP,                   -- 限速结束时间（可为空）
     create_time TIMESTAMP DEFAULT NOW(),  -- 创建时间，默认为当前时间
-    FOREIGN KEY (link_id) REFERENCES road_coordinate(link_id) -- 外键约束
+    FOREIGN KEY (link_id) REFERENCES road(link_id) -- 外键约束
 );
