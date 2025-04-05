@@ -90,3 +90,83 @@ class SpeedLimitPolicy:
     start_time: datetime
     end_time: Optional[datetime]
     create_time: datetime = datetime.now()
+
+
+@dataclass
+class Gantry:
+    gantry_id: int
+    sequence_number: int
+    unique_number: int
+    gantry_code: str
+    gantry_name: str
+    toll_station: Optional[str]
+    subcenter: Optional[str]
+    longitude: float
+    latitude: float
+    stake_number: Optional[str]
+    direction: int
+
+    def to_schema(self):
+        from schemas import gantry as schemas
+        return schemas.GantryModel(
+            gantry_id=self.gantry_id,
+            sequence_number=self.sequence_number,
+            unique_number=self.unique_number,
+            gantry_code=self.gantry_code,
+            gantry_name=self.gantry_name,
+            toll_station=self.toll_station,
+            subcenter=self.subcenter,
+            longitude=self.longitude,
+            latitude=self.latitude,
+            stake_number=self.stake_number,
+            direction=self.direction,
+            location=[self.longitude, self.latitude]
+        )
+
+    @staticmethod
+    def from_db(record) -> "Gantry":
+        return Gantry(
+            gantry_id=record["gantry_id"],
+            sequence_number=record["sequence_number"],
+            unique_number=record["unique_number"],
+            gantry_code=record["gantry_code"],
+            gantry_name=record["gantry_name"],
+            toll_station=record["toll_station"],
+            subcenter=record["subcenter"],
+            longitude=record["longitude"],
+            latitude=record["latitude"],
+            stake_number=record["stake_number"],
+            direction=record["direction"]
+        )
+
+
+@dataclass
+class VehiclePassage:
+    passage_id: int
+    gantry_id: int
+    passage_time: datetime
+    vehicle_plate: str
+    vehicle_type: int
+    create_time: datetime = datetime.now()
+
+    def to_schema(self):
+        from schemas import gantry as schemas
+        return schemas.VehiclePassageModel(
+            passage_id=self.passage_id,
+            gantry_id=self.gantry_id,
+            passage_time=self.passage_time,
+            vehicle_plate=self.vehicle_plate,
+            vehicle_type=self.vehicle_type,
+            create_time=self.create_time
+        )
+
+    @staticmethod
+    def from_db(record) -> "VehiclePassage":
+        return VehiclePassage(
+            passage_id=record["passage_id"],
+            gantry_id=record["gantry_id"],
+            passage_time=record["passage_time"],
+            vehicle_plate=record["vehicle_plate"],
+            vehicle_type=record["vehicle_type"],
+            create_time=record.get("create_time", datetime.now())
+        )

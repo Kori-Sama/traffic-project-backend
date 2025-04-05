@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(
 async def main():
     from db.core import get_db, init_db, close_db
     await init_db()
-    with open("sql/init.sql", 'r') as f:
+    with open("sql/init.sql", 'r', encoding="utf-8") as f:
         sql = f.read()
         # print(sql)
         db = await get_db()

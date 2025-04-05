@@ -58,3 +58,35 @@ CREATE TABLE IF NOT EXISTS speed_limit_policy (
     create_time TIMESTAMP DEFAULT NOW(),  -- 创建时间，默认为当前时间
     FOREIGN KEY (link_id) REFERENCES road(link_id) -- 外键约束
 );
+
+-- 创建门架表
+CREATE TABLE IF NOT EXISTS gantry (
+    gantry_id SERIAL PRIMARY KEY,                 -- 门架ID，主键，自增
+    sequence_number INT NOT NULL,                 -- 顺序编号
+    unique_number INT NOT NULL,                   -- 唯一编号
+    gantry_code VARCHAR(20) NOT NULL UNIQUE,      -- 门架编号
+    gantry_name VARCHAR(100) NOT NULL,            -- 门架名称
+    toll_station VARCHAR(50),                     -- 所属收费站
+    subcenter VARCHAR(50),                        -- 所属分中心
+    longitude DOUBLE PRECISION NOT NULL,          -- 经度
+    latitude DOUBLE PRECISION NOT NULL,           -- 纬度
+    stake_number VARCHAR(20),                     -- 桩号
+    direction INT NOT NULL,                       -- 方向：1表示上行，2表示下行
+    location GEOMETRY(POINT, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)) STORED
+);
+
+-- 创建车辆通行记录表
+CREATE TABLE IF NOT EXISTS vehicle_passage (
+    passage_id SERIAL PRIMARY KEY,                -- 通行记录ID，主键，自增
+    gantry_id INT NOT NULL,                       -- 门架ID，外键
+    passage_time TIMESTAMP NOT NULL,              -- 通过时间
+    vehicle_plate VARCHAR(20) NOT NULL,           -- 车牌号
+    vehicle_type INT NOT NULL,                    -- 车辆类型
+    FOREIGN KEY (gantry_id) REFERENCES gantry(gantry_id)
+);
+
+-- 创建索引以提高查询效率
+CREATE INDEX idx_vehicle_passage_gantry_id ON vehicle_passage(gantry_id);
+CREATE INDEX idx_vehicle_passage_passage_time ON vehicle_passage(passage_time);
+CREATE INDEX idx_vehicle_passage_vehicle_plate ON vehicle_passage(vehicle_plate);
+CREATE INDEX idx_gantry_location ON gantry USING GIST(location);
