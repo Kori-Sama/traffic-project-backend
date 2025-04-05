@@ -6,11 +6,12 @@ from core.middleware import LogRoute
 from db.road_condition import get_last_conditions
 from router.response import Ok
 from schemas.common import Response
-from schemas.lstm import PredictInput, PredictOutput, PredictResponse
+from schemas.lstm import PredictInput, PredictInputV2, PredictOutput, PredictResponse
 from lstm import predict
 
+from db.trunk_ramp import list_trunk_road_flows
 
-router = APIRouter(prefix="/predict", route_class=LogRoute)
+router = APIRouter(prefix="/predict", route_class=LogRoute, tags=["predict"])
 
 
 @router.post("/lstm")
@@ -31,6 +32,46 @@ async def predict_api(
         ) for item in conditions
     ]
 
+    outputs = predict.run(inputs)
+    return Ok(dict(
+        last=[PredictOutput(
+            time=item.start_time,
+            volume=item.traffic_volume
+        ) for item in inputs],
+        predict=[PredictOutput(
+            time=item["time"],
+            volume=item["predicted_traffic_volume"]
+        ) for item in outputs]
+    ))
+
+
+@router.post("/flow/lstm")
+async def predict_api_v2(
+    input_data: PredictInputV2
+) -> Response[PredictResponse]:
+    """
+    Predict traffic volume by LSTM model.
+    """
+
+    road_flows = await list_trunk_road_flows(
+        from_gantry_id=input_data.from_gantry_id,
+        to_gantry_id=input_data.to_gantry_id,
+        start_time=input_data.start_time,
+        end_time=input_data.end_time)
+
+    if not road_flows:
+        return Ok(dict(
+            last=[],
+            predict=[]
+        ))
+    inputs = [
+        predict.PredictInputData(
+            road_id=item.from_gantry_id,
+            start_time=item.start_time,
+            end_time=item.end_time,
+            traffic_volume=item.traffic_volume
+        ) for item in road_flows
+    ]
     outputs = predict.run(inputs)
     return Ok(dict(
         last=[PredictOutput(

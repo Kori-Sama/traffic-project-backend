@@ -1,5 +1,6 @@
+from typing import Optional
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class PredictInput(BaseModel):
@@ -16,3 +17,11 @@ class PredictOutput(BaseModel):
 class PredictResponse(BaseModel):
     last: list[PredictOutput] = Field(..., description="最近的真实数据")
     predict: list[PredictOutput] = Field(..., description="预测数据")
+
+
+class PredictInputV2(BaseModel):
+    from_gantry_id: int = Field(..., description="起始门架ID")
+    to_gantry_id: int = Field(..., description="结束门架ID")
+    start_time: datetime = Field(..., description="预测开始时间")
+    end_time: Optional[datetime] = Field(
+        None, description="预测结束时间, 默认为当前时间加5分钟")
