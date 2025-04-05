@@ -4,6 +4,7 @@ from typing import Optional
 from shapely.geometry import LineString
 from shapely import wkb
 from schemas import traffic as schemas
+from schemas import trunk_ramp as trunk_ramp_schemas
 
 
 @dataclass
@@ -169,4 +170,147 @@ class VehiclePassage:
             vehicle_plate=record["vehicle_plate"],
             vehicle_type=record["vehicle_type"],
             create_time=record.get("create_time", datetime.now())
+        )
+
+
+@dataclass
+class TrunkRoadPassage:
+    passage_id: int
+    from_gantry_id: int
+    to_gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    vehicle_plate: str
+    speed: Optional[float]
+
+    def to_schema(self):
+        from schemas import trunk_ramp as schemas
+        return schemas.TrunkRoadPassageModel(
+            passage_id=self.passage_id,
+            from_gantry_id=self.from_gantry_id,
+            to_gantry_id=self.to_gantry_id,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            vehicle_plate=self.vehicle_plate,
+            speed=self.speed
+        )
+
+    @staticmethod
+    def from_db(record) -> "TrunkRoadPassage":
+        return TrunkRoadPassage(
+            passage_id=record["passage_id"],
+            from_gantry_id=record["from_gantry_id"],
+            to_gantry_id=record["to_gantry_id"],
+            start_time=record["start_time"],
+            end_time=record["end_time"],
+            vehicle_plate=record["vehicle_plate"],
+            speed=record["speed"]
+        )
+
+
+@dataclass
+class TrunkRoadFlow:
+    flow_id: int
+    road_name: str
+    from_gantry_id: int
+    to_gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    traffic_volume: int
+    avg_speed: Optional[float]
+
+    def to_schema(self):
+        from schemas import trunk_ramp as schemas
+        return schemas.TrunkRoadFlowModel(
+            flow_id=self.flow_id,
+            road_name=self.road_name,
+            from_gantry_id=self.from_gantry_id,
+            to_gantry_id=self.to_gantry_id,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            traffic_volume=self.traffic_volume,
+            avg_speed=self.avg_speed
+        )
+
+    @staticmethod
+    def from_db(record) -> "TrunkRoadFlow":
+        return TrunkRoadFlow(
+            flow_id=record["flow_id"],
+            road_name=record["road_name"],
+            from_gantry_id=record["from_gantry_id"],
+            to_gantry_id=record["to_gantry_id"],
+            start_time=record["start_time"],
+            end_time=record["end_time"],
+            traffic_volume=record["traffic_volume"],
+            avg_speed=record["avg_speed"]
+        )
+
+
+@dataclass
+class RampVehiclePassage:
+    passage_id: int
+    ramp_type: str
+    to_gantry_id: int
+    passage_time: datetime
+    vehicle_plate: str
+    vehicle_type: int
+
+    def to_schema(self):
+        from schemas import trunk_ramp as schemas
+        return schemas.RampVehiclePassageModel(
+            passage_id=self.passage_id,
+            ramp_type=self.ramp_type,
+            to_gantry_id=self.to_gantry_id,
+            passage_time=self.passage_time,
+            vehicle_plate=self.vehicle_plate,
+            vehicle_type=self.vehicle_type
+        )
+
+    @staticmethod
+    def from_db(record) -> "RampVehiclePassage":
+        return RampVehiclePassage(
+            passage_id=record["passage_id"],
+            ramp_type=record["ramp_type"],
+            to_gantry_id=record["to_gantry_id"],
+            passage_time=record["passage_time"],
+            vehicle_plate=record["vehicle_plate"],
+            vehicle_type=record["vehicle_type"]
+        )
+
+
+@dataclass
+class RampFlow:
+    flow_id: int
+    ramp_name: str
+    ramp_type: str
+    from_sequence: int
+    to_gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    traffic_volume: int
+
+    def to_schema(self):
+        from schemas import trunk_ramp as schemas
+        return schemas.RampFlowModel(
+            flow_id=self.flow_id,
+            ramp_name=self.ramp_name,
+            ramp_type=self.ramp_type,
+            from_sequence=self.from_sequence,
+            to_gantry_id=self.to_gantry_id,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            traffic_volume=self.traffic_volume
+        )
+
+    @staticmethod
+    def from_db(record) -> "RampFlow":
+        return RampFlow(
+            flow_id=record["flow_id"],
+            ramp_name=record["ramp_name"],
+            ramp_type=record["ramp_type"],
+            from_sequence=record["from_sequence"],
+            to_gantry_id=record["to_gantry_id"],
+            start_time=record["start_time"],
+            end_time=record["end_time"],
+            traffic_volume=record["traffic_volume"]
         )

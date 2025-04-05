@@ -85,8 +85,85 @@ CREATE TABLE IF NOT EXISTS vehicle_passage (
     FOREIGN KEY (gantry_id) REFERENCES gantry(gantry_id)
 );
 
--- 创建索引以提高查询效率
-CREATE INDEX idx_vehicle_passage_gantry_id ON vehicle_passage(gantry_id);
-CREATE INDEX idx_vehicle_passage_passage_time ON vehicle_passage(passage_time);
-CREATE INDEX idx_vehicle_passage_vehicle_plate ON vehicle_passage(vehicle_plate);
-CREATE INDEX idx_gantry_location ON gantry USING GIST(location);
+-- -- 创建索引以提高查询效率
+-- CREATE INDEX idx_vehicle_passage_gantry_id ON vehicle_passage(gantry_id);
+-- CREATE INDEX idx_vehicle_passage_passage_time ON vehicle_passage(passage_time);
+-- CREATE INDEX idx_vehicle_passage_vehicle_plate ON vehicle_passage(vehicle_plate);
+-- CREATE INDEX idx_gantry_location ON gantry USING GIST(location);
+
+
+-- 创建主干路车辆通行记录表
+CREATE TABLE IF NOT EXISTS trunk_road_passage (
+    passage_id SERIAL PRIMARY KEY,                -- 通行记录ID，主键，自增
+    from_gantry_id INT NOT NULL,                  -- 起始门架ID
+    to_gantry_id INT NOT NULL,                    -- 目的门架ID
+    start_time TIMESTAMP NOT NULL,                -- 通过起始门架时间
+    end_time TIMESTAMP NOT NULL,                  -- 通过目的门架时间
+    vehicle_plate VARCHAR(20) NOT NULL,           -- 车牌号
+    speed DOUBLE PRECISION,                       -- 平均速度(km/h)
+    FOREIGN KEY (from_gantry_id) REFERENCES gantry(gantry_id),
+    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+);
+
+-- 创建主干路流量表
+CREATE TABLE IF NOT EXISTS trunk_road_flow (
+    flow_id SERIAL PRIMARY KEY,                   -- 流量记录ID，主键，自增
+    road_name VARCHAR(30) NOT NULL,               -- 道路名称 (例如: pass_6_301_7_311)
+    from_gantry_id INT NOT NULL,                  -- 起始门架ID
+    to_gantry_id INT NOT NULL,                    -- 目的门架ID
+    start_time TIMESTAMP NOT NULL,                -- 时间段开始
+    end_time TIMESTAMP NOT NULL,                  -- 时间段结束
+    traffic_volume INT NOT NULL,                  -- 车流量
+    avg_speed DOUBLE PRECISION,                   -- 平均速度(km/h)
+    FOREIGN KEY (from_gantry_id) REFERENCES gantry(gantry_id),
+    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+);
+
+-- -- 创建索引以提高查询效率
+-- CREATE INDEX idx_trunk_road_passage_from_gantry ON trunk_road_passage(from_gantry_id);
+-- CREATE INDEX idx_trunk_road_passage_to_gantry ON trunk_road_passage(to_gantry_id);
+-- CREATE INDEX idx_trunk_road_passage_times ON trunk_road_passage(start_time, end_time);
+-- CREATE INDEX idx_trunk_road_passage_plate ON trunk_road_passage(vehicle_plate);
+
+-- CREATE INDEX idx_trunk_road_flow_road_name ON trunk_road_flow(road_name);
+-- CREATE INDEX idx_trunk_road_flow_gantries ON trunk_road_flow(from_gantry_id, to_gantry_id);
+-- CREATE INDEX idx_trunk_road_flow_time_period ON trunk_road_flow(start_time, end_time);
+
+-- CREATE INDEX idx_trunk_road_mapping_road_name ON trunk_road_mapping(road_name);
+-- CREATE INDEX idx_trunk_road_mapping_link_id ON trunk_road_mapping(link_id);
+
+-- 创建匝道车辆通行记录表
+CREATE TABLE IF NOT EXISTS ramp_vehicle_passage (
+    passage_id SERIAL PRIMARY KEY,                -- 通行记录ID，主键，自增
+    ramp_type VARCHAR(10) NOT NULL,               -- 匝道类型：'enter'或'exit'
+    to_gantry_id INT NOT NULL,                    -- 目的门架ID（上匝道）或来源门架ID（下匝道）
+    passage_time TIMESTAMP NOT NULL,              -- 通过时间
+    vehicle_plate VARCHAR(20) NOT NULL,           -- 车牌号
+    vehicle_type INT NOT NULL,                    -- 车辆类型
+    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+);
+
+-- 创建匝道流量表
+CREATE TABLE IF NOT EXISTS ramp_flow (
+    flow_id SERIAL PRIMARY KEY,                   -- 流量记录ID，主键，自增
+    ramp_name VARCHAR(30) NOT NULL,               -- 匝道名称 (例如: enter_4_5_291, exit_16_17)
+    ramp_type VARCHAR(10) NOT NULL,               -- 匝道类型：'enter'或'exit'
+    from_sequence INT NOT NULL,                   -- 起始序号（如enter_4_5_291中的4）
+    to_gantry_id INT NOT NULL,                    -- 目的门架ID
+    start_time TIMESTAMP NOT NULL,                -- 时间段开始
+    end_time TIMESTAMP NOT NULL,                  -- 时间段结束
+    traffic_volume INT NOT NULL,                  -- 车流量
+    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+);
+
+
+-- -- 创建索引以提高查询效率
+-- CREATE INDEX idx_ramp_vehicle_passage_gantry ON ramp_vehicle_passage(to_gantry_id);
+-- CREATE INDEX idx_ramp_vehicle_passage_time ON ramp_vehicle_passage(passage_time);
+-- CREATE INDEX idx_ramp_vehicle_passage_plate ON ramp_vehicle_passage(vehicle_plate);
+-- CREATE INDEX idx_ramp_vehicle_passage_type ON ramp_vehicle_passage(ramp_type);
+
+-- CREATE INDEX idx_ramp_flow_name ON ramp_flow(ramp_name);
+-- CREATE INDEX idx_ramp_flow_gantry ON ramp_flow(to_gantry_id);
+-- CREATE INDEX idx_ramp_flow_time_period ON ramp_flow(start_time, end_time);
+-- CREATE INDEX idx_ramp_flow_type ON ramp_flow(ramp_type);
