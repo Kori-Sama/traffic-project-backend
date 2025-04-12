@@ -8,27 +8,27 @@ from db.models import TrunkRoadPassage, TrunkRoadFlow, RampVehiclePassage, RampF
 @with_connection
 async def list_trunk_road_passages(
     conn,
-    from_gantry_id: Optional[int] = None,
-    to_gantry_id: Optional[int] = None,
+    from_gantry_id: int,
+    to_gantry_id: int,
     vehicle_plate: Optional[str] = None,
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
     offset: int = 0,
     limit: int = 10
 ) -> List[TrunkRoadPassage]:
-    conditions = ["1=1"]
-    params = []
-    param_index = 1
-
-    if from_gantry_id is not None:
-        conditions.append(f"from_gantry_id = ${param_index}")
-        params.append(from_gantry_id)
-        param_index += 1
-
-    if to_gantry_id is not None:
-        conditions.append(f"to_gantry_id = ${param_index}")
-        params.append(to_gantry_id)
-        param_index += 1
+    """
+    Query trunk road passages between a range of gantries (inclusive).
+    For example, between gantry 5 and 7 would return all passages where:
+    (from_gantry_id >= 5 AND to_gantry_id <= 7) AND
+    (from_gantry_id < to_gantry_id)
+    """
+    conditions = [
+        "from_gantry_id >= $1",
+        "to_gantry_id <= $2",
+        "from_gantry_id < to_gantry_id"  # Ensure correct direction
+    ]
+    params = [from_gantry_id, to_gantry_id]
+    param_index = 3
 
     if vehicle_plate is not None:
         conditions.append(f"vehicle_plate = ${param_index}")
@@ -94,36 +94,31 @@ async def create_trunk_road_passage(
     return passage_id
 
 
-# 主干路流量相关操作
 @with_connection
 async def list_trunk_road_flows(
     conn,
+    from_gantry_id: int,
+    to_gantry_id: int,
+    # keep api same as before, don't change it
     road_name: Optional[str] = None,
-    from_gantry_id: Optional[int] = None,
-    to_gantry_id: Optional[int] = None,
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
     offset: int = 0,
-    limit: int = 10
+    limit: int = 100
 ) -> List[TrunkRoadFlow]:
-    conditions = ["1=1"]
-    params = []
-    param_index = 1
-
-    if road_name is not None:
-        conditions.append(f"road_name = ${param_index}")
-        params.append(road_name)
-        param_index += 1
-
-    if from_gantry_id is not None:
-        conditions.append(f"from_gantry_id = ${param_index}")
-        params.append(from_gantry_id)
-        param_index += 1
-
-    if to_gantry_id is not None:
-        conditions.append(f"to_gantry_id = ${param_index}")
-        params.append(to_gantry_id)
-        param_index += 1
+    """
+    Query trunk road flows between a range of gantries (inclusive).
+    For example, between gantry 5 and 7 would return all flows where:
+    (from_gantry_id >= 5 AND to_gantry_id <= 7) AND
+    (from_gantry_id < to_gantry_id)
+    """
+    conditions = [
+        "from_gantry_id >= $1",
+        "to_gantry_id <= $2",
+        "from_gantry_id < to_gantry_id"  # Ensure correct direction
+    ]
+    params = [from_gantry_id, to_gantry_id]
+    param_index = 3
 
     if start_time is not None:
         conditions.append(f"start_time >= ${param_index}")
@@ -141,7 +136,7 @@ async def list_trunk_road_flows(
     SELECT *
     FROM trunk_road_flow
     WHERE {where_clause}
-    ORDER BY start_time DESC
+    ORDER BY from_gantry_id, to_gantry_id, start_time DESC
     LIMIT ${param_index} OFFSET ${param_index + 1};
     """
 
