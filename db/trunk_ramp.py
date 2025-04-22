@@ -120,8 +120,8 @@ async def list_trunk_road_flows(
         params = [from_gantry_id, to_gantry_id]
     elif from_gantry_id > to_gantry_id:
         conditions = [
-            "from_gantry_id <= $1",
-            "to_gantry_id >= $2",
+            "to_gantry_id >= $1",
+            "from_gantry_id <= $2",
         ]
         params = [to_gantry_id, from_gantry_id]
     else:
