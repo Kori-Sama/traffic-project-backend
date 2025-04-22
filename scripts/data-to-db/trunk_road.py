@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import psycopg2
-from datetime import datetime
 import re
 import tqdm
 import time
@@ -138,7 +137,7 @@ def process_passage_file(conn, file_path):
         batch_size = 5000
 
         # 显示进度条
-        progress = tqdm.tqdm(total=len(df), desc=f"导入通行记录到数据库")
+        progress = tqdm.tqdm(total=len(df), desc="导入通行记录到数据库")
 
         for i in range(0, len(df), batch_size):
             batch = df.iloc[i:i+batch_size]
@@ -216,7 +215,7 @@ def process_flow_file(conn, file_path):
         batch_size = 5000
 
         # 显示进度条
-        progress = tqdm.tqdm(total=len(df), desc=f"导入流量数据到数据库")
+        progress = tqdm.tqdm(total=len(df), desc="导入流量数据到数据库")
 
         for i in range(0, len(df), batch_size):
             batch = df.iloc[i:i+batch_size]
@@ -294,7 +293,7 @@ def main():
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
 
-        print(f"\n✅ 数据导入完成")
+        print("\n✅ 数据导入完成")
         print(f"总执行时间: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
 
     except Exception as e:

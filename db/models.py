@@ -4,7 +4,6 @@ from typing import Optional
 from shapely.geometry import LineString
 from shapely import wkb
 from schemas import traffic as schemas
-from schemas import trunk_ramp as trunk_ramp_schemas
 
 
 @dataclass

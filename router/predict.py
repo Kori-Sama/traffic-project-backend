@@ -1,12 +1,12 @@
 
 from datetime import timedelta
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from core.middleware import LogRoute
 from db.road_condition import get_last_conditions
 from router.response import Ok
 from schemas.common import Response
-from schemas.lstm import PredictInput, PredictInputV2, PredictOutput, PredictResponse
+from schemas.lstm import PredictInputV2, PredictOutput, PredictResponse
 from lstm import predict
 
 from db.trunk_ramp import list_trunk_road_flows

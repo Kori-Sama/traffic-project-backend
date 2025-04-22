@@ -1,9 +1,6 @@
 import os
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
 
-from core.middleware import LogRoute
 
 
 router = APIRouter(prefix="/video")

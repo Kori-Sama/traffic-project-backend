@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class PredictInput(BaseModel):

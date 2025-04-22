@@ -112,12 +112,21 @@ async def list_trunk_road_flows(
     (from_gantry_id >= 5 AND to_gantry_id <= 7) AND
     (from_gantry_id < to_gantry_id)
     """
-    conditions = [
-        "from_gantry_id >= $1",
-        "to_gantry_id <= $2",
-        "from_gantry_id < to_gantry_id"  # Ensure correct direction
-    ]
-    params = [from_gantry_id, to_gantry_id]
+    if from_gantry_id < to_gantry_id:
+        conditions = [
+            "from_gantry_id >= $1",
+            "to_gantry_id <= $2",
+        ]
+        params = [from_gantry_id, to_gantry_id]
+    elif from_gantry_id > to_gantry_id:
+        conditions = [
+            "from_gantry_id <= $1",
+            "to_gantry_id >= $2",
+        ]
+        params = [to_gantry_id, from_gantry_id]
+    else:
+        return []
+
     param_index = 3
 
     if start_time is not None:

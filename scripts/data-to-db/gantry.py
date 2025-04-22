@@ -1,8 +1,5 @@
 import os
-import pandas as pd
 import psycopg2
-from datetime import datetime
-import re
 import tqdm
 import time
 
@@ -280,7 +277,7 @@ def main():
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
 
-        print(f"\n✅ Data import completed successfully.")
+        print("\n✅ Data import completed successfully.")
         print(
             f"Total execution time: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
     finally:
