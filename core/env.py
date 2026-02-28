@@ -2,7 +2,7 @@ from os import getenv
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 class Config:
@@ -19,3 +19,5 @@ class Config:
 
 
 config = Config()
+
+print(config.DB.HOST)

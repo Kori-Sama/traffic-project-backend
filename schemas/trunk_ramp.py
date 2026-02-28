@@ -46,3 +46,14 @@ class RampFlowModel(BaseModel):
     start_time: datetime
     end_time: datetime
     traffic_volume: int
+
+
+# 门架流量模型
+class GantryTrafficFlowModel(BaseModel):
+    flow_id: int
+    gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    traffic_volume: int
+    avg_speed: Optional[float]
+    sample_count: Optional[int]

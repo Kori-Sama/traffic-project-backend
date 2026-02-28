@@ -246,6 +246,29 @@ class TrunkRoadFlow:
 
 
 @dataclass
+class GantryTrafficFlow:
+    flow_id: int
+    gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    traffic_volume: int
+    avg_speed: Optional[float]
+    sample_count: Optional[int]
+
+    @staticmethod
+    def from_db(record) -> "GantryTrafficFlow":
+        return GantryTrafficFlow(
+            flow_id=record["flow_id"],
+            gantry_id=record["gantry_id"],
+            start_time=record["start_time"],
+            end_time=record["end_time"],
+            traffic_volume=record["traffic_volume"],
+            avg_speed=record["avg_speed"],
+            sample_count=record.get("sample_count")
+        )
+
+
+@dataclass
 class RampVehiclePassage:
     passage_id: int
     ramp_type: str

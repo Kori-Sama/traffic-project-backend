@@ -10,7 +10,7 @@ DB_PARAMS = {
     'dbname': 'traffic',
     'user': 'kori',
     'password': '123456',
-    'host': '47.120.24.209',
+    'host': '17.72.93.24',
     'port': '5432'
 }
 

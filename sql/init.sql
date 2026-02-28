@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS trunk_road_passage (
 -- 创建主干路流量表
 CREATE TABLE IF NOT EXISTS trunk_road_flow (
     flow_id SERIAL PRIMARY KEY,                   -- 流量记录ID，主键，自增
-    road_name VARCHAR(30) NOT NULL,               -- 道路名称 (例如: pass_6_301_7_311)
+    road_name VARCHAR(255) NOT NULL,               -- 道路名称 (例如: pass_6_301_7_311)
     from_gantry_id INT NOT NULL,                  -- 起始门架ID
     to_gantry_id INT NOT NULL,                    -- 目的门架ID
     start_time TIMESTAMP NOT NULL,                -- 时间段开始
@@ -116,7 +116,8 @@ CREATE TABLE IF NOT EXISTS trunk_road_flow (
     traffic_volume INT NOT NULL,                  -- 车流量
     avg_speed DOUBLE PRECISION,                   -- 平均速度(km/h)
     FOREIGN KEY (from_gantry_id) REFERENCES gantry(gantry_id),
-    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+    FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id),
+    UNIQUE (road_name, from_gantry_id, to_gantry_id, start_time)
 );
 
 -- -- 创建索引以提高查询效率
@@ -154,6 +155,19 @@ CREATE TABLE IF NOT EXISTS ramp_flow (
     end_time TIMESTAMP NOT NULL,                  -- 时间段结束
     traffic_volume INT NOT NULL,                  -- 车流量
     FOREIGN KEY (to_gantry_id) REFERENCES gantry(gantry_id)
+);
+
+-- 创建门架流量表 (用于存储5分钟粒度的门架流量数据)
+CREATE TABLE IF NOT EXISTS gantry_traffic_flow (
+    flow_id SERIAL PRIMARY KEY,                   -- 流量记录ID，主键，自增
+    gantry_id INT NOT NULL,                       -- 门架ID
+    start_time TIMESTAMP NOT NULL,                -- 时间段开始
+    end_time TIMESTAMP NOT NULL,                  -- 时间段结束
+    traffic_volume INT NOT NULL,                  -- 车流量
+    avg_speed DOUBLE PRECISION,                   -- 平均速度(km/h)
+    sample_count INT,                             -- 速度匹配样本数
+    FOREIGN KEY (gantry_id) REFERENCES gantry(gantry_id),
+    UNIQUE (gantry_id, start_time)
 );
 
 

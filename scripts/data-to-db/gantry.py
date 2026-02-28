@@ -8,7 +8,7 @@ DB_PARAMS = {
     'dbname': 'traffic',
     'user': 'kori',
     'password': '123456',  # Replace with your actual password
-    'host': 'localhost',
+    'host': '17.72.93.24',
     'port': '5432'
 }
 
