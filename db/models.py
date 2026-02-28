@@ -255,6 +255,18 @@ class GantryTrafficFlow:
     avg_speed: Optional[float]
     sample_count: Optional[int]
 
+    def to_schema(self):
+        from schemas import trunk_ramp as schemas
+        return schemas.GantryTrafficFlowModel(
+            flow_id=self.flow_id,
+            gantry_id=self.gantry_id,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            traffic_volume=self.traffic_volume,
+            avg_speed=self.avg_speed,
+            sample_count=self.sample_count
+        )
+
     @staticmethod
     def from_db(record) -> "GantryTrafficFlow":
         return GantryTrafficFlow(

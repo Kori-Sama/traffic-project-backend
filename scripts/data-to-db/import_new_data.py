@@ -45,26 +45,64 @@ def parse_xlsx_raw(f):
 async def import_gantries():
     db = await get_db()
     
-    # Process File 1: 纳黔-川南公司门架基础信息表.xlsx
-    # Columns: 路段(A), 管理中心(B), 门架编号(C), 门架名称(D), 上行/下行(E), 桩号(F), 经纬度(G)
-    print("Importing gantries from 纳黔-川南公司门架基础信息表.xlsx...")
-    rows1 = parse_xlsx_raw('data/纳黔-川南公司门架基础信息表.xlsx')
-    # Skip header (row 0 is title, row 1 is header)
-    for row in rows1[2:]:
-        code = row.get('C')
-        name = row.get('D')
-        direction_str = row.get('E')
+    # # Process File 1: 纳黔-川南公司门架基础信息表.xlsx
+    # # Columns: 路段(A), 管理中心(B), 门架编号(C), 门架名称(D), 上行/下行(E), 桩号(F), 经纬度(G)
+    # print("Importing gantries from 纳黔-川南公司门架基础信息表.xlsx...")
+    # rows1 = parse_xlsx_raw('data/纳黔-川南公司门架基础信息表.xlsx')
+    # # Skip header (row 0 is title, row 1 is header)
+    # for row in rows1[2:]:
+    #     code = row.get('C')
+    #     name = row.get('D')
+    #     direction_str = row.get('E')
+    #     stake = row.get('F')
+    #     coords = row.get('G', '').split(',')
+        
+    #     if not code or len(coords) < 2: continue
+        
+    #     try:
+    #         lon = float(coords[0].strip())
+    #         lat = float(coords[1].strip())
+    #     except ValueError: continue
+        
+    #     direction = 1 if '上行' in direction_str else 2
+        
+    #     await db.execute("""
+    #         INSERT INTO gantry (sequence_number, unique_number, gantry_code, gantry_name, 
+    #                            subcenter, longitude, latitude, stake_number, direction)
+    #         VALUES (0, 0, $1, $2, $3, $4, $5, $6, $7)
+    #         ON CONFLICT (gantry_code) DO UPDATE 
+    #         SET gantry_name = EXCLUDED.gantry_name, 
+    #             longitude = EXCLUDED.longitude, 
+    #             latitude = EXCLUDED.latitude
+    #     """, code, name, row.get('B'), lon, lat, stake, direction)
+
+    # Process File 2: 隆纳路段门架经纬度明细表.xlsx
+    # Columns: 序号(A), 所属路线编号(B), 所属路段名称(C), 点位所在位置类型(D), 通道信息(E), 桩号(F), 经度(G), 纬度(H), 行政区划编码(I), K: 详细名称
+    print("Importing gantries from 隆纳路段门架经纬度明细表.xlsx...")
+    rows2 = parse_xlsx_raw('data/隆纳路段门架经纬度明细表.xlsx')
+    for row in rows2[2:]:
+        # Try to use K column if it exists as it matches CSV gantry names
+        name = row.get('K')
+        if name:
+            name = name.replace(' ', '').split('K')[0] # Clean up
+        else:
+            info = row.get('E', '')
+            # Extract name from info: e.g., "G76(...)K1930+640(隆纳山川-隆纳隆昌门架)" -> "隆纳山川-隆纳隆昌门架"
+            if '(' in info:
+                name = info.split('(')[-1].replace(')', '').replace('门架', '')
+            else:
+                name = info
+        
         stake = row.get('F')
-        coords = row.get('G', '').split(',')
-        
-        if not code or len(coords) < 2: continue
-        
         try:
-            lon = float(coords[0].strip())
-            lat = float(coords[1].strip())
-        except ValueError: continue
+            lon = float(row.get('G'))
+            lat = float(row.get('H'))
+        except (ValueError, TypeError): continue
         
-        direction = 1 if '上行' in direction_str else 2
+        # In this file, the gantry_code used in CSVs seems to be the name itself for some records
+        # or we might need to match them later. For now, use the name as code to allow matching.
+        code = name
+        direction = 1 if '上行' in (row.get('K') or '') or '上行' in (row.get('E') or '') else 2
         
         await db.execute("""
             INSERT INTO gantry (sequence_number, unique_number, gantry_code, gantry_name, 
@@ -73,33 +111,10 @@ async def import_gantries():
             ON CONFLICT (gantry_code) DO UPDATE 
             SET gantry_name = EXCLUDED.gantry_name, 
                 longitude = EXCLUDED.longitude, 
-                latitude = EXCLUDED.latitude
-        """, code, name, row.get('B'), lon, lat, stake, direction)
-
-    # Process File 2: 隆纳路段门架经纬度明细表.xlsx
-    # Columns: 序号(A), 所属路线编号(B), 所属路段名称(C), 点位所在位置类型(D), 通道信息(E), 桩号(F), 经度(G), 纬度(H), 行政区划编码(I)
-    print("Importing gantries from 隆纳路段门架经纬度明细表.xlsx...")
-    rows2 = parse_xlsx_raw('data/隆纳路段门架经纬度明细表.xlsx')
-    for row in rows2[2:]:
-        info = row.get('E', '')
-        # Extract name from info: e.g., "隆纳山川-隆纳隆昌门架"
-        name_match = info.split('(')[-1].replace(')', '').replace('门架', '') if '(' in info else info
-        stake = row.get('F')
-        try:
-            lon = float(row.get('G'))
-            lat = float(row.get('H'))
-        except (ValueError, TypeError): continue
-        
-        # We don't have a code here, but we can match by name or use a dummy code if needed.
-        # However, the CSV files use codes like 'G007651002000320010'.
-        # Let's see if we can infer direction from stake or name.
-        direction = 1 # Default
-        
-        # For this file, since codes are missing, we might need them to match with traffic data.
-        # But we can at least store the coordinates.
-        # Generating a dummy code based on name if not exists? 
-        # Actually, let's just skip if we don't have a code, or wait until we see traffic data.
-        # The traffic data CSV files ARE named by code.
+                latitude = EXCLUDED.latitude,
+                stake_number = EXCLUDED.stake_number,
+                direction = EXCLUDED.direction
+        """, code, name, "隆纳路段", lon, lat, stake, direction)
 
 async def import_traffic_flow():
     db = await get_db()
@@ -146,7 +161,7 @@ async def main():
     await init_db()
     try:
         await import_gantries()
-        await import_traffic_flow()
+        #await import_traffic_flow()
         print("✅ Data import completed successfully.")
     finally:
         await close_db()

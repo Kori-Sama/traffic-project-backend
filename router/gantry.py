@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Query
 from schemas.gantry import GantryModel, VehiclePassageModel
+from schemas.trunk_ramp import GantryTrafficFlowModel
 from db import gantry as gantry_db
 
 router = APIRouter(prefix="/gantry", tags=["gantry"])
@@ -50,3 +51,22 @@ async def list_vehicle_passages(
         limit=limit
     )
     return [p.to_schema() for p in passages]
+
+
+@router.get("/traffic/list", response_model=List[GantryTrafficFlowModel])
+async def list_gantry_traffic(
+    gantry_id: Optional[int] = None,
+    start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000)
+):
+    """查询门架流量记录 (5分钟粒度)"""
+    traffic = await gantry_db.list_gantry_traffic(
+        gantry_id=gantry_id,
+        start_time=start_time,
+        end_time=end_time,
+        offset=offset,
+        limit=limit
+    )
+    return [t.to_schema() for t in traffic]

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from db.core import with_connection
-from db.models import Gantry, VehiclePassage
+from db.models import Gantry, VehiclePassage, GantryTrafficFlow
 
 
 @with_connection
@@ -131,3 +131,45 @@ async def create_vehicle_passage(
         vehicle_type
     )
     return passage_id
+
+
+@with_connection
+async def list_gantry_traffic(
+    conn,
+    gantry_id: Optional[int] = None,
+    start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None,
+    offset: int = 0,
+    limit: int = 100
+) -> List[GantryTrafficFlow]:
+    conditions = ["1=1"]
+    params = []
+    param_index = 1
+
+    if gantry_id is not None:
+        conditions.append(f"gantry_id = ${param_index}")
+        params.append(gantry_id)
+        param_index += 1
+
+    if start_time is not None:
+        conditions.append(f"start_time >= ${param_index}")
+        params.append(start_time)
+        param_index += 1
+
+    if end_time is not None:
+        conditions.append(f"end_time <= ${param_index}")
+        params.append(end_time)
+        param_index += 1
+
+    params.extend([limit, offset])
+    where_clause = " AND ".join(conditions)
+    query = f"""
+    SELECT *
+    FROM gantry_traffic_flow
+    WHERE {where_clause}
+    ORDER BY start_time DESC
+    LIMIT ${param_index} OFFSET ${param_index + 1};
+    """
+
+    records = await conn.fetch(query, *params)
+    return [GantryTrafficFlow.from_db(record) for record in records]
