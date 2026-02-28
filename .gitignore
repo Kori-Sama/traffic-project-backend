@@ -4,3 +4,5 @@
 *.log
 __pycache__/
 videos/
+data/
+.DS_Store

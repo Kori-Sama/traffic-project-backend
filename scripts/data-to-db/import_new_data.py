@@ -116,53 +116,11 @@ async def import_gantries():
                 direction = EXCLUDED.direction
         """, code, name, "隆纳路段", lon, lat, stake, direction)
 
-async def import_traffic_flow():
-    db = await get_db()
-    data_dir = 'data/处理后5min数据result/'
-    files = [f for f in os.listdir(data_dir) if f.endswith('.csv')]
-    
-    # Load gantry mapping (code -> id)
-    gantry_rows = await db.fetch("SELECT gantry_id, gantry_code FROM gantry")
-    gantry_map = {r['gantry_code']: r['gantry_id'] for r in gantry_rows}
-    
-    print(f"Importing traffic flow from {len(files)} files...")
-    for filename in files:
-        file_path = os.path.join(data_dir, filename)
-        df = pd.read_csv(file_path)
-        
-        # Columns: 时间段起始, 门架名称, 流量, 平均速度(km/h), 速度匹配样本数
-        for _, row in df.iterrows():
-            code = row['门架名称']
-            gantry_id = gantry_map.get(code)
-            if not gantry_id:
-                # If gantry doesn't exist, create a placeholder
-                gantry_id = await db.fetchval("""
-                    INSERT INTO gantry (sequence_number, unique_number, gantry_code, gantry_name, longitude, latitude, direction)
-                    VALUES (0, 0, $1, $1, 0, 0, 1)
-                    RETURNING gantry_id
-                """, code)
-                gantry_map[code] = gantry_id
-            
-            start_time = pd.to_datetime(row['时间段起始'])
-            end_time = start_time + pd.Timedelta(minutes=5)
-            
-            # Use gantry_traffic_flow table to isolate new data
-            await db.execute("""
-                INSERT INTO gantry_traffic_flow (gantry_id, start_time, end_time, traffic_volume, avg_speed, sample_count)
-                VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (gantry_id, start_time) DO UPDATE
-                SET traffic_volume = EXCLUDED.traffic_volume,
-                    avg_speed = EXCLUDED.avg_speed,
-                    sample_count = EXCLUDED.sample_count
-            """, gantry_id, start_time, end_time, int(row['流量']), float(row['平均速度(km/h)']), int(row['速度匹配样本数']))
-
 async def main():
-
     await init_db()
     try:
         await import_gantries()
-        #await import_traffic_flow()
-        print("✅ Data import completed successfully.")
+        print("✅ Gantry data import completed successfully.")
     finally:
         await close_db()
 
