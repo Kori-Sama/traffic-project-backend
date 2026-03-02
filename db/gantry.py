@@ -77,7 +77,7 @@ async def list_vehicle_passages(
     param_index = 1
 
     if gantry_id is not None:
-        conditions.append(f"gantry_id = ${param_index}")
+        conditions.append(f"gantry_id = ${param_index}::int")
         params.append(gantry_id)
         param_index += 1
 
@@ -87,12 +87,12 @@ async def list_vehicle_passages(
         param_index += 1
 
     if start_time is not None:
-        conditions.append(f"passage_time >= ${param_index}")
+        conditions.append(f"passage_time >= ${param_index}::timestamp")
         params.append(start_time)
         param_index += 1
 
     if end_time is not None:
-        conditions.append(f"passage_time <= ${param_index}")
+        conditions.append(f"passage_time <= ${param_index}::timestamp")
         params.append(end_time)
         param_index += 1
 
@@ -120,7 +120,7 @@ async def create_vehicle_passage(
 ) -> int:
     query = """
     INSERT INTO vehicle_passage (gantry_id, passage_time, vehicle_plate, vehicle_type)
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1::int, $2::timestamp, $3, $4::int)
     RETURNING passage_id;
     """
     passage_id = await conn.fetchval(
@@ -147,17 +147,17 @@ async def list_gantry_traffic(
     param_index = 1
 
     if gantry_id is not None:
-        conditions.append(f"gantry_id = ${param_index}")
+        conditions.append(f"gantry_id = ${param_index}::int")
         params.append(gantry_id)
         param_index += 1
 
     if start_time is not None:
-        conditions.append(f"start_time >= ${param_index}")
+        conditions.append(f"start_time >= ${param_index}::timestamp")
         params.append(start_time)
         param_index += 1
 
     if end_time is not None:
-        conditions.append(f"end_time <= ${param_index}")
+        conditions.append(f"end_time <= ${param_index}::timestamp")
         params.append(end_time)
         param_index += 1
 
@@ -180,8 +180,8 @@ async def get_segment_traffic_summary(
     conn,
     from_gantry_id: int,
     to_gantry_id: int,
-    start_time: datetime,
-    end_time: datetime
+    start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None
 ) -> List[dict]:
     """
     Get traffic summary for a segment defined by from and to gantries.
@@ -191,7 +191,7 @@ async def get_segment_traffic_summary(
     g_info = await conn.fetch("""
         SELECT gantry_id, sequence_number, direction, subcenter 
         FROM gantry 
-        WHERE gantry_id IN ($1, $2)
+        WHERE gantry_id IN ($1::int, $2::int)
     """, from_gantry_id, to_gantry_id)
     
     if len(g_info) < 2:
@@ -207,9 +207,9 @@ async def get_segment_traffic_summary(
     ids_in_range = await conn.fetchval("""
         SELECT array_agg(gantry_id)
         FROM gantry
-        WHERE direction = $1 
+        WHERE direction = $1::int 
           AND subcenter = $2
-          AND sequence_number BETWEEN LEAST($3, $4) AND GREATEST($3, $4)
+          AND sequence_number BETWEEN LEAST($3::int, $4::int) AND GREATEST($3::int, $4::int)
     """, start_g['direction'], start_g['subcenter'], start_g['sequence_number'], end_g['sequence_number'])
 
     if not ids_in_range:
@@ -227,9 +227,9 @@ async def get_segment_traffic_summary(
         SUM(sample_count)::int as sample_count,
         COUNT(DISTINCT gantry_id)::int as gantry_count
     FROM gantry_traffic_flow
-    WHERE gantry_id = ANY($3) 
-      AND start_time >= $4 
-      AND end_time <= $5
+    WHERE gantry_id = ANY($3::int[]) 
+      AND ($4::timestamp IS NULL OR start_time >= $4::timestamp)
+      AND ($5::timestamp IS NULL OR end_time <= $5::timestamp)
     GROUP BY start_time, end_time
     ORDER BY start_time DESC;
     """
