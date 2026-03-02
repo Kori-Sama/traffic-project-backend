@@ -173,3 +173,66 @@ async def list_gantry_traffic(
 
     records = await conn.fetch(query, *params)
     return [GantryTrafficFlow.from_db(record) for record in records]
+
+
+@with_connection
+async def get_segment_traffic_summary(
+    conn,
+    from_gantry_id: int,
+    to_gantry_id: int,
+    start_time: datetime,
+    end_time: datetime
+) -> List[dict]:
+    """
+    Get traffic summary for a segment defined by from and to gantries.
+    It finds all gantries in between based on sequence_number and direction.
+    """
+    # 1. Get sequence and direction for both gantries
+    g_info = await conn.fetch("""
+        SELECT gantry_id, sequence_number, direction, subcenter 
+        FROM gantry 
+        WHERE gantry_id IN ($1, $2)
+    """, from_gantry_id, to_gantry_id)
+    
+    if len(g_info) < 2:
+        if len(g_info) == 1 and from_gantry_id == to_gantry_id:
+            pass 
+        else:
+            return []
+    
+    start_g = next(g for g in g_info if g['gantry_id'] == from_gantry_id)
+    end_g = next(g for g in g_info if g['gantry_id'] == to_gantry_id)
+    
+    # 2. Find all gantry IDs in the range
+    ids_in_range = await conn.fetchval("""
+        SELECT array_agg(gantry_id)
+        FROM gantry
+        WHERE direction = $1 
+          AND subcenter = $2
+          AND sequence_number BETWEEN LEAST($3, $4) AND GREATEST($3, $4)
+    """, start_g['direction'], start_g['subcenter'], start_g['sequence_number'], end_g['sequence_number'])
+
+    if not ids_in_range:
+        return []
+
+    # 3. Aggregate traffic for these gantries
+    query = """
+    SELECT 
+        $1::int as from_gantry_id,
+        $2::int as to_gantry_id,
+        start_time, 
+        end_time,
+        ROUND(AVG(traffic_volume))::int as traffic_volume,
+        ROUND(AVG(avg_speed), 2)::float as avg_speed,
+        SUM(sample_count)::int as sample_count,
+        COUNT(DISTINCT gantry_id)::int as gantry_count
+    FROM gantry_traffic_flow
+    WHERE gantry_id = ANY($3) 
+      AND start_time >= $4 
+      AND end_time <= $5
+    GROUP BY start_time, end_time
+    ORDER BY start_time DESC;
+    """
+    
+    records = await conn.fetch(query, from_gantry_id, to_gantry_id, ids_in_range, start_time, end_time)
+    return [dict(r) for r in records]

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Query
-from schemas.gantry import GantryModel, VehiclePassageModel
+from schemas.gantry import GantryModel, VehiclePassageModel, GantrySegmentFlowModel
 from schemas.trunk_ramp import GantryTrafficFlowModel
 from db import gantry as gantry_db
 
@@ -70,3 +70,24 @@ async def list_gantry_traffic(
         limit=limit
     )
     return [t.to_schema() for t in traffic]
+
+
+@router.get("/traffic/path-summary", response_model=List[GantrySegmentFlowModel])
+async def get_path_traffic_summary(
+    from_gantry_id: int = Query(..., description="起始门架ID"),
+    to_gantry_id: int = Query(..., description="终点门架ID"),
+    start_time: Optional[datetime] = Query(None),
+    end_time: Optional[datetime] = Query(None),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000)
+):
+    """
+    聚合多个门架在特定时间段内的流量数据 (路段多选查询)
+    """
+    summary = await gantry_db.get_segment_traffic_summary(
+        from_gantry_id=from_gantry_id,
+        to_gantry_id=to_gantry_id,
+        start_time=start_time,
+        end_time=end_time
+    )
+    return summary[offset : offset + limit]

@@ -25,3 +25,14 @@ class VehiclePassageModel(BaseModel):
     vehicle_plate: str
     vehicle_type: int
     create_time: datetime = Field(default_factory=datetime.now)
+
+
+class GantrySegmentFlowModel(BaseModel):
+    from_gantry_id: int
+    to_gantry_id: int
+    start_time: datetime
+    end_time: datetime
+    traffic_volume: int
+    avg_speed: float
+    sample_count: Optional[int]
+    gantry_count: Optional[int]
