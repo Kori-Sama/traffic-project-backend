@@ -170,6 +170,10 @@ CREATE TABLE IF NOT EXISTS gantry_traffic_flow (
     UNIQUE (gantry_id, start_time)
 );
 
+CREATE INDEX IF NOT EXISTS idx_gantry_traffic_flow_lookup ON gantry_traffic_flow (gantry_id, start_time DESC);
+CREATE INDEX IF NOT EXISTS idx_gantry_traffic_flow_time ON gantry_traffic_flow (start_time DESC);
+
+
 
 -- -- 创建索引以提高查询效率
 -- CREATE INDEX idx_ramp_vehicle_passage_gantry ON ramp_vehicle_passage(to_gantry_id);

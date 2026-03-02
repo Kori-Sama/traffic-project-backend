@@ -163,8 +163,13 @@ async def list_gantry_traffic(
 
     params.extend([limit, offset])
     where_clause = " AND ".join(conditions)
+    
+    # Use COALESCE(NULLIF(..., 'NaN'), 0) to ensure JSON compliance
     query = f"""
-    SELECT *
+    SELECT 
+        flow_id, gantry_id, start_time, end_time, traffic_volume,
+        COALESCE(NULLIF(avg_speed, 'NaN'::float), 0) as avg_speed,
+        sample_count
     FROM gantry_traffic_flow
     WHERE {where_clause}
     ORDER BY start_time DESC
@@ -172,6 +177,8 @@ async def list_gantry_traffic(
     """
 
     records = await conn.fetch(query, *params)
+    if not records:
+        return []
     return [GantryTrafficFlow.from_db(record) for record in records]
 
 
@@ -194,14 +201,14 @@ async def get_segment_traffic_summary(
         WHERE gantry_id IN ($1::int, $2::int)
     """, from_gantry_id, to_gantry_id)
     
-    if len(g_info) < 2:
-        if len(g_info) == 1 and from_gantry_id == to_gantry_id:
-            pass 
-        else:
-            return []
+    if not g_info:
+        return []
     
-    start_g = next(g for g in g_info if g['gantry_id'] == from_gantry_id)
-    end_g = next(g for g in g_info if g['gantry_id'] == to_gantry_id)
+    try:
+        start_g = next(g for g in g_info if g['gantry_id'] == from_gantry_id)
+        end_g = next((g for g in g_info if g['gantry_id'] == to_gantry_id), start_g)
+    except StopIteration:
+        return []
     
     # 2. Find all gantry IDs in the range
     ids_in_range = await conn.fetchval("""
@@ -213,26 +220,43 @@ async def get_segment_traffic_summary(
     """, start_g['direction'], start_g['subcenter'], start_g['sequence_number'], end_g['sequence_number'])
 
     if not ids_in_range:
-        return []
+        ids_in_range = [from_gantry_id, to_gantry_id]
 
-    # 3. Aggregate traffic for these gantries
-    query = """
+    # 3. Aggregate traffic for these gantries - Robust against NaN
+    params = [from_gantry_id, to_gantry_id, ids_in_range]
+    conditions = ["gantry_id = ANY($3::int[])"]
+    param_idx = 4
+
+    if start_time:
+        conditions.append(f"start_time >= ${param_idx}::timestamp")
+        params.append(start_time)
+        param_idx += 1
+    
+    if end_time:
+        conditions.append(f"end_time <= ${param_idx}::timestamp")
+        params.append(end_time)
+        param_idx += 1
+
+    where_clause = " AND ".join(conditions)
+    
+    # We use FILTER to exclude NaN from AVG and COALESCE to handle NULL results
+    query = f"""
     SELECT 
         $1::int as from_gantry_id,
         $2::int as to_gantry_id,
         start_time, 
         end_time,
-        ROUND(AVG(traffic_volume))::int as traffic_volume,
-        ROUND(AVG(avg_speed), 2)::float as avg_speed,
-        SUM(sample_count)::int as sample_count,
+        ROUND(COALESCE(AVG(traffic_volume), 0)::numeric)::int as traffic_volume,
+        ROUND(COALESCE(AVG(avg_speed) FILTER (WHERE avg_speed != 'NaN'::float), 0)::numeric, 2)::float as avg_speed,
+        SUM(COALESCE(sample_count, 0))::int as sample_count,
         COUNT(DISTINCT gantry_id)::int as gantry_count
     FROM gantry_traffic_flow
-    WHERE gantry_id = ANY($3::int[]) 
-      AND ($4::timestamp IS NULL OR start_time >= $4::timestamp)
-      AND ($5::timestamp IS NULL OR end_time <= $5::timestamp)
+    WHERE {where_clause}
     GROUP BY start_time, end_time
-    ORDER BY start_time DESC;
+    HAVING COUNT(DISTINCT gantry_id) > 0
+    ORDER BY start_time DESC
+    LIMIT 1000;
     """
     
-    records = await conn.fetch(query, from_gantry_id, to_gantry_id, ids_in_range, start_time, end_time)
+    records = await conn.fetch(query, *params)
     return [dict(r) for r in records]
