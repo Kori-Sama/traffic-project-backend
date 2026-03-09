@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, date
 from typing import Optional
 from shapely.geometry import LineString
@@ -41,7 +41,7 @@ class TrafficEvent:
     description: Optional[str]
     start_time: datetime
     end_time: Optional[datetime]
-    create_time: datetime = datetime.now()
+    create_time: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
@@ -79,7 +79,7 @@ class TrafficStatus:
     link_id: int
     daily_10min: datetime
     status: str
-    create_time: datetime = datetime.now()
+    create_time: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
@@ -89,7 +89,7 @@ class SpeedLimitPolicy:
     speed_limit: float
     start_time: datetime
     end_time: Optional[datetime]
-    create_time: datetime = datetime.now()
+    create_time: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
@@ -147,7 +147,7 @@ class VehiclePassage:
     passage_time: datetime
     vehicle_plate: str
     vehicle_type: int
-    create_time: datetime = datetime.now()
+    create_time: datetime = field(default_factory=datetime.now)
 
     def to_schema(self):
         from schemas import gantry as schemas

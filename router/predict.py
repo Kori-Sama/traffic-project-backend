@@ -5,7 +5,7 @@ from fastapi import APIRouter
 
 from core.middleware import LogRoute
 from db.road_condition import get_last_conditions
-from router.response import Ok
+from router.response import Ok, Bad
 from schemas.common import Response
 from schemas.lstm import PredictInputV2, PredictOutput, PredictResponse
 from lstm import predict
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/predict", route_class=LogRoute, tags=["predict"])
 
 
 def _run_prediction(inputs: List[predict.PredictInputData]) -> PredictResponse:
-    if not inputs:
+    if len(inputs) < 6:
         return PredictResponse(last=[], predict=[])
 
     inputs.sort(key=lambda x: x.start_time)
@@ -61,7 +61,15 @@ async def predict_api(
     """
     Predict traffic speed and volume by LSTM model.
     """
-    conditions = await get_last_conditions(int(link_id), 6)
+    try:
+        id = int(link_id)
+    except (ValueError, TypeError):
+        return Bad("Invalid link_id, must be a number")
+
+    conditions = await get_last_conditions(id, 6)
+
+    if len(conditions) < 6:
+        return Bad("Insufficient data for prediction, need at least 6 records")
 
     inputs = [
         predict.PredictInputData(
@@ -72,17 +80,7 @@ async def predict_api(
         ) for item in conditions
     ]
 
-    outputs = predict.run(inputs)
-    return Ok(dict(
-        last=[PredictOutput(
-            time=item.start_time,
-            volume=item.traffic_volume
-        ) for item in inputs],
-        predict=[PredictOutput(
-            time=item["time"],
-            volume=item["predicted_traffic_volume"]
-        ) for item in outputs]
-    ))
+    return Ok(_run_prediction(inputs))
 
 
 @router.post("/flow/lstm")

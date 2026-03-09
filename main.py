@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -6,11 +8,14 @@ from core.middleware import middlewares
 from db.core import close_db, init_db
 from core.utils import load_routers
 
-app = FastAPI(
-    on_startup=[init_db],
-    on_shutdown=[close_db],
-    middleware=middlewares
-)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
+
+app = FastAPI(lifespan=lifespan, middleware=middlewares)
 
 app.mount("/videos", StaticFiles(directory="videos"), name="video")
 

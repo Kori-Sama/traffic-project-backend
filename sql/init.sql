@@ -85,11 +85,11 @@ CREATE TABLE IF NOT EXISTS vehicle_passage (
     FOREIGN KEY (gantry_id) REFERENCES gantry(gantry_id)
 );
 
--- -- 创建索引以提高查询效率
--- CREATE INDEX idx_vehicle_passage_gantry_id ON vehicle_passage(gantry_id);
--- CREATE INDEX idx_vehicle_passage_passage_time ON vehicle_passage(passage_time);
--- CREATE INDEX idx_vehicle_passage_vehicle_plate ON vehicle_passage(vehicle_plate);
--- CREATE INDEX idx_gantry_location ON gantry USING GIST(location);
+-- 创建索引以提高查询效率
+CREATE INDEX IF NOT EXISTS idx_vehicle_passage_gantry_id ON vehicle_passage(gantry_id);
+CREATE INDEX IF NOT EXISTS idx_vehicle_passage_passage_time ON vehicle_passage(passage_time);
+CREATE INDEX IF NOT EXISTS idx_vehicle_passage_vehicle_plate ON vehicle_passage(vehicle_plate);
+CREATE INDEX IF NOT EXISTS idx_gantry_location ON gantry USING GIST(location);
 
 
 -- 创建主干路车辆通行记录表
@@ -120,15 +120,15 @@ CREATE TABLE IF NOT EXISTS trunk_road_flow (
     UNIQUE (road_name, from_gantry_id, to_gantry_id, start_time)
 );
 
--- -- 创建索引以提高查询效率
--- CREATE INDEX idx_trunk_road_passage_from_gantry ON trunk_road_passage(from_gantry_id);
--- CREATE INDEX idx_trunk_road_passage_to_gantry ON trunk_road_passage(to_gantry_id);
--- CREATE INDEX idx_trunk_road_passage_times ON trunk_road_passage(start_time, end_time);
--- CREATE INDEX idx_trunk_road_passage_plate ON trunk_road_passage(vehicle_plate);
+-- 创建索引以提高查询效率
+CREATE INDEX IF NOT EXISTS idx_trunk_road_passage_from_gantry ON trunk_road_passage(from_gantry_id);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_passage_to_gantry ON trunk_road_passage(to_gantry_id);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_passage_times ON trunk_road_passage(start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_passage_plate ON trunk_road_passage(vehicle_plate);
 
--- CREATE INDEX idx_trunk_road_flow_road_name ON trunk_road_flow(road_name);
--- CREATE INDEX idx_trunk_road_flow_gantries ON trunk_road_flow(from_gantry_id, to_gantry_id);
--- CREATE INDEX idx_trunk_road_flow_time_period ON trunk_road_flow(start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_flow_road_name ON trunk_road_flow(road_name);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_flow_gantries ON trunk_road_flow(from_gantry_id, to_gantry_id);
+CREATE INDEX IF NOT EXISTS idx_trunk_road_flow_time_period ON trunk_road_flow(start_time, end_time);
 
 -- CREATE INDEX idx_trunk_road_mapping_road_name ON trunk_road_mapping(road_name);
 -- CREATE INDEX idx_trunk_road_mapping_link_id ON trunk_road_mapping(link_id);
@@ -175,13 +175,13 @@ CREATE INDEX IF NOT EXISTS idx_gantry_traffic_flow_time ON gantry_traffic_flow (
 
 
 
--- -- 创建索引以提高查询效率
--- CREATE INDEX idx_ramp_vehicle_passage_gantry ON ramp_vehicle_passage(to_gantry_id);
--- CREATE INDEX idx_ramp_vehicle_passage_time ON ramp_vehicle_passage(passage_time);
--- CREATE INDEX idx_ramp_vehicle_passage_plate ON ramp_vehicle_passage(vehicle_plate);
--- CREATE INDEX idx_ramp_vehicle_passage_type ON ramp_vehicle_passage(ramp_type);
+-- 创建索引以提高查询效率
+CREATE INDEX IF NOT EXISTS idx_ramp_vehicle_passage_gantry ON ramp_vehicle_passage(to_gantry_id);
+CREATE INDEX IF NOT EXISTS idx_ramp_vehicle_passage_time ON ramp_vehicle_passage(passage_time);
+CREATE INDEX IF NOT EXISTS idx_ramp_vehicle_passage_plate ON ramp_vehicle_passage(vehicle_plate);
+CREATE INDEX IF NOT EXISTS idx_ramp_vehicle_passage_type ON ramp_vehicle_passage(ramp_type);
 
--- CREATE INDEX idx_ramp_flow_name ON ramp_flow(ramp_name);
--- CREATE INDEX idx_ramp_flow_gantry ON ramp_flow(to_gantry_id);
--- CREATE INDEX idx_ramp_flow_time_period ON ramp_flow(start_time, end_time);
--- CREATE INDEX idx_ramp_flow_type ON ramp_flow(ramp_type);
+CREATE INDEX IF NOT EXISTS idx_ramp_flow_name ON ramp_flow(ramp_name);
+CREATE INDEX IF NOT EXISTS idx_ramp_flow_gantry ON ramp_flow(to_gantry_id);
+CREATE INDEX IF NOT EXISTS idx_ramp_flow_time_period ON ramp_flow(start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_ramp_flow_type ON ramp_flow(ramp_type);

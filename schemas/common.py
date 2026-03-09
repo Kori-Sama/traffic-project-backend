@@ -15,7 +15,7 @@ class Response(BaseModel, Generic[T]):
 class QueryData(BaseModel):
     """分页查询基础数据"""
 
-    offset: int = Field(default=1, description="页码", ge=1)
+    offset: int = Field(default=0, description="偏移量", ge=0)
     limit: int = Field(default=10, description="数量", ge=1)
 
 

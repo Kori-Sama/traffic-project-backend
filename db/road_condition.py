@@ -11,9 +11,13 @@ async def list_road_conditions(conn, offset: int, limit: int) -> list[RoadCondit
 
 
 @with_connection
-async def get_conditions_by_link_id(conn, link_id: int) -> list[RoadCondition]:
-    query = "SELECT * FROM road_condition WHERE link_id = $1;"
-    records = await conn.fetch(query, link_id)
+async def get_conditions_by_link_id(conn, link_id: int, offset: int = 0, limit: int = 10) -> list[RoadCondition]:
+    query = """
+    SELECT * FROM road_condition WHERE link_id = $1
+    ORDER BY daily_10min DESC
+    LIMIT $2 OFFSET $3;
+    """
+    records = await conn.fetch(query, link_id, limit, offset)
     return [RoadCondition(**record) for record in records]
 
 
