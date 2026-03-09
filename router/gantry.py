@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from schemas.gantry import GantryModel, VehiclePassageModel, GantrySegmentFlowModel
 from schemas.trunk_ramp import GantryTrafficFlowModel
 from db import gantry as gantry_db
@@ -22,6 +22,8 @@ async def list_gantries(
 async def get_gantry(gantry_id: int):
     """根据ID获取门架信息"""
     gantry = await gantry_db.get_gantry_by_id(gantry_id)
+    if not gantry:
+        raise HTTPException(status_code=404, detail="Gantry not found")
     return gantry.to_schema()
 
 
@@ -29,6 +31,8 @@ async def get_gantry(gantry_id: int):
 async def get_gantry_by_code(gantry_code: str):
     """根据门架编号获取门架信息"""
     gantry = await gantry_db.get_gantry_by_code(gantry_code)
+    if not gantry:
+        raise HTTPException(status_code=404, detail="Gantry not found")
     return gantry.to_schema()
 
 

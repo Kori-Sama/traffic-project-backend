@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from schemas.trunk_ramp import RampVehiclePassageModel, RampFlowModel
 from db import trunk_ramp as trunk_ramp_db
 
@@ -35,6 +35,8 @@ async def list_ramp_vehicle_passages(
 async def get_ramp_vehicle_passage(passage_id: int):
     """根据ID获取匝道车辆通行记录"""
     passage = await trunk_ramp_db.get_ramp_vehicle_passage_by_id(passage_id)
+    if not passage:
+        raise HTTPException(status_code=404, detail="Ramp vehicle passage not found")
     return passage.to_schema()
 
 
@@ -66,4 +68,6 @@ async def list_ramp_flows(
 async def get_ramp_flow(flow_id: int):
     """根据ID获取匝道流量"""
     flow = await trunk_ramp_db.get_ramp_flow_by_id(flow_id)
+    if not flow:
+        raise HTTPException(status_code=404, detail="Ramp flow not found")
     return flow.to_schema()

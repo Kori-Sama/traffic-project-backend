@@ -17,7 +17,10 @@ async def get_last_conditions_api(link_id: str, last_num: int) -> Response[List[
     """
     Get the last n road conditions by link_id.
     """
-    id = int(link_id)
+    try:
+        id = int(link_id)
+    except ValueError:
+        return Bad("Invalid link_id, must be a number")
     data = await get_last_conditions(id, last_num)
     data = [item.to_schema() for item in data]
     if not data:
@@ -31,7 +34,10 @@ async def get_conditions_with_time_range_api(link_id: str, time_range: TimeRange
     """
     Get road conditions by link_id with time range. 
     """
-    id = int(link_id)
+    try:
+        id = int(link_id)
+    except ValueError:
+        return Bad("Invalid link_id, must be a number")
     data = await get_conditions_with_time_range(id, time_range.start_time, time_range.end_time)
 
     data = [item.to_schema() for item in data]

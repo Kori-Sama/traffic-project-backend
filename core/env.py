@@ -19,5 +19,3 @@ class Config:
 
 
 config = Config()
-
-print(config.DB.HOST)

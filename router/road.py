@@ -8,7 +8,7 @@ from db.road import get_road, list_roads
 from router.error import LINK_ID_NOT_FOUND
 from router.response import Bad, Ok
 from schemas.common import QueryData, Response
-from schemas.composite import RoadModel
+from schemas.composite import RoadModel as CompositeRoadModel
 from schemas.traffic import RoadModel
 
 
@@ -30,7 +30,10 @@ async def get_road_api(link_id: str, with_conditions: bool = False, query: Query
     """
     Get road coordinate by link_id, if with_conditions is True, it will also return the road conditions.
     """
-    id = int(link_id)
+    try:
+        id = int(link_id)
+    except ValueError:
+        return Bad("Invalid link_id, must be a number")
     if not with_conditions:
         data = await get_road(id)
         if data:
@@ -45,4 +48,4 @@ async def get_road_api(link_id: str, with_conditions: bool = False, query: Query
 
     road = data[0].to_schema()
     road_conditions = [item.to_schema() for item in data[1]]
-    return Ok(RoadModel(**road.model_dump(), road_conditions=road_conditions))
+    return Ok(CompositeRoadModel(**road.model_dump(), road_conditions=road_conditions))
